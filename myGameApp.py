@@ -24,16 +24,28 @@ class Player(pg.sprite.Sprite):
         self.image.fill(GREEN)
         #useful for moving, size, position and collision
         self.rect = self.image.get_rect() #looks at the image and gets its rect
-        self.rect.center = (WIDTH/2,HEIGHT/2) #places image in the centre
+        self.rect.centerx = WIDTH/2 #places image in the centre
         self.rect.bottom = HEIGHT-10 #puts it 10px from the bottom of the screen
         #needs to move side to side so we need speed
         self.speedx = 0
     def update(self):
-        #move the sprite at a speed set by controls
-        self.rect.x += self.speedx
-        #to ensure it does not run off screen
+        #we will keep the default speed of the object to 0 and only alter it with a key press
+        #this way we avoid coding for what heppens when the key is released
         if self.rect.left > WIDTH:
             self.rect.right = 0
+        #returned a list of key that are down (pressed)
+        keystate = pg.key.get_pressed()
+        if keystate[pg.K_LEFT]:
+            self.speedx = -5
+        if keystate[pg.K_RIGHT]:
+            self.speedx = 5
+        self.rect.x += self.speedx #move at the speed set by controls
+
+        #constrain the object within the width of the screen
+        if self.rect.right > WIDTH:
+            self.rect.right = WIDTH
+        if self.rect.left < 0:
+            self.rect.left = 0
 
 #initialise coomon pygame objects
 pg.init()
