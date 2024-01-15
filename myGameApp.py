@@ -111,7 +111,7 @@ while running:
                                                     #FALSE indicates whethere hit items in group should be deleted or not
     if hits:
         running = False
-        
+
     #draw/render
     screen.fill(BLACK)
     all_sprites.draw(screen)
