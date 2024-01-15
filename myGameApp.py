@@ -16,6 +16,22 @@ BLUE = (0,0,255)
 #a sprite will be an object which inherits from the built in sprite class
 class Player(pg.sprite.Sprite):
     #sprite for the player
+    def __init__(self):
+        #contrustor
+        pg.sprite.Sprite.__init__(self)
+        #gives you a surface to draw on
+        self.image = pg.Surface((50,50))
+        self.image.fill(GREEN)
+        #useful for moving, size, position and collision
+        self.rect = self.image.get_rect() #looks at the image and gets its rect
+        self.rect.center = (WIDTH/2,HEIGHT/2) #places image in the centre
+
+    def update(self):
+        #move the sprite
+        self.rect.x +=5
+        #to ensure it does not run off screen
+        if self.rect.left > WIDTH:
+            self.rect.right = 0
 
 #initialise coomon pygame objects
 pg.init()
@@ -28,6 +44,10 @@ clock = pg.time.Clock()
 
 #create a sprite group
 all_sprites = pg.sprite.Group()
+#instantiate the player object and add it to sprite group
+player = Player()
+all_sprites.add(player)
+
 #Game loop
 running = True
 while running:
