@@ -46,6 +46,27 @@ class Player(pg.sprite.Sprite):
             self.rect.right = WIDTH
         if self.rect.left < 0:
             self.rect.left = 0
+class Mob(pg.sprite.Sprite):
+    #enemy mobile object which inhereits from spirte
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.Surface((30,40))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+
+        #makes enemy spawn randomly at top of screen and start dropping down
+        self.rect.x = random.randrange(0, WIDTH - self.rect.width) #appears within limits of the x of the screen
+        self.rect.y = random.randrange(-100,-40) # this is off the screen
+        self.speedy = random.randrange(1,8)
+    def update(self):
+        #move downwards
+        self.rect.y += self.speedy
+        #gets rid of enemy when they get to bottom of screen
+        if self.rect.top > HEIGHT +10:
+            self.rect.x = random.randrange(0, WIDTH - self.rect.width)
+            self.rect.y = random.randrange(-100,-40) # this is off the screen
+            self.speedy = random.randrange(1,8)
+
 
 #initialise coomon pygame objects
 pg.init()
@@ -58,8 +79,16 @@ clock = pg.time.Clock()
 
 #create a sprite group
 all_sprites = pg.sprite.Group()
+mobs = pg.sprite.Group() #creating another group aids during collision detection
+
 #instantiate the player object and add it to sprite group
 player = Player()
+#spawns mobs
+for i in range(8):
+    m = Mob()
+    all_sprites.add(m)
+    mobs.add(m)
+
 all_sprites.add(player)
 
 #Game loop
@@ -76,6 +105,13 @@ while running:
             running = False
     #update
     all_sprites.update()
+
+    #checks to see if a mob hit the player
+    hits = pg.sprite.spritecollide(player,mobs,False) #parameters are objects to check against and group againt
+                                                    #FALSE indicates whethere hit items in group should be deleted or not
+    if hits:
+        running = False
+        
     #draw/render
     screen.fill(BLACK)
     all_sprites.draw(screen)
