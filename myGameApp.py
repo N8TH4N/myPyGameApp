@@ -4,8 +4,8 @@ import pygame as pg
 import random
 
 #parameters
-WIDTH,HEIGHT,FPS = (800,600,30)
-
+WIDTH,HEIGHT,FPS = (480,600,60)
+#60 fps makes it fast and smooth
 #define colours
 WHITE = (255,255,255)
 BLACK = (0,0,0)
@@ -20,15 +20,17 @@ class Player(pg.sprite.Sprite):
         #contrustor
         pg.sprite.Sprite.__init__(self)
         #gives you a surface to draw on
-        self.image = pg.Surface((50,50))
+        self.image = pg.Surface((50,40))
         self.image.fill(GREEN)
         #useful for moving, size, position and collision
         self.rect = self.image.get_rect() #looks at the image and gets its rect
         self.rect.center = (WIDTH/2,HEIGHT/2) #places image in the centre
-
+        self.rect.bottom = HEIGHT-10 #puts it 10px from the bottom of the screen
+        #needs to move side to side so we need speed
+        self.speedx = 0
     def update(self):
-        #move the sprite
-        self.rect.x +=5
+        #move the sprite at a speed set by controls
+        self.rect.x += self.speedx
         #to ensure it does not run off screen
         if self.rect.left > WIDTH:
             self.rect.right = 0
