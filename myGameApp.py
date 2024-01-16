@@ -3,6 +3,11 @@
 import pygame as pg
 import random
 
+from os import path
+img_dir = path.join(path.dirname(__file__),"img") #img is the folder here the graphics are
+
+#.
+
 #parameters
 WIDTH,HEIGHT,FPS = (480,600,60)
 #60 fps makes it fast and smooth
@@ -20,8 +25,12 @@ class Player(pg.sprite.Sprite):
         #contrustor
         pg.sprite.Sprite.__init__(self)
         #gives you a surface to draw on
-        self.image = pg.Surface((50,40))
-        self.image.fill(GREEN)
+        #self.image = pg.Surface((50,40))
+        #self.image.fill(GREEN)
+        #load the image and scale it using the transform method
+        self.image = pg.transform.scale(player_img,(50,38))
+        #to remove the black rectangle around the image we set a colour key
+        self.image.set_colorkey(BLACK)
         #useful for moving, size, position and collision
         self.rect = self.image.get_rect() #looks at the image and gets its rect
         self.rect.centerx = WIDTH/2 #places image in the centre
@@ -59,8 +68,10 @@ class Mob(pg.sprite.Sprite):
     #enemy mobile object which inhereits from spirte
     def __init__(self):
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface((30,40))
-        self.image.fill(RED)
+        #self.image = pg.Surface((30,40))
+        #self.image.fill(RED)
+        self.image = pg.transform.scale(mob_img,(38,50))
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
 
         #makes enemy spawn randomly at top of screen and start dropping down
@@ -80,8 +91,10 @@ class Bullet(pg.sprite.Sprite):
     def __init__(self,x,y):
         #x and y and respawn positions are based on player's position
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface((10,20))
-        self.image.fill(YELLOW)
+        #self.image = pg.Surface((10,20))
+        #self.image.fill(YELLOW)
+        self.image = pg.transform.scale(bullet_img,(10,20))
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         #set respawn position of bullete to right infront of player
         self.rect.bottom = y
@@ -104,6 +117,18 @@ pg.mixer.init()
 screen = pg.display.set_mode((WIDTH, HEIGHT))
 pg.display.set_caption("My Game")
 clock = pg.time.Clock()
+
+#loads all game graphics
+#convert() methods iwll draw the image in memory before it is displayed
+#this is faster than drawing it in real time i.e. pixel by pixel
+
+background = pg.image.load(path.join(img_dir,"space.jpg")).convert()
+player_img = pg.image.load(path.join(img_dir,"ship3.png")).convert()
+bullet_img = pg.image.load(path.join(img_dir,"pewpew.png")).convert()
+mob_img = pg.image.load(path.join(img_dir,"alien.png")).convert()
+
+ #to place the image somewhere make a rect or it
+background_rect = background.get_rect()
 
 #create a sprite group
 all_sprites = pg.sprite.Group()
@@ -138,7 +163,7 @@ while running:
     #update
     all_sprites.update()
 
-    #checks of a bullet hits a mob
+   #checks of a bullet hits a mob
         #have to consider a group of bullets and group of mobs
         #using a pygame.sprite.groupcollide() method helps to collide two groups togther
         #setting the last 2 parameters will delete the bullet and the mob which collide with each other
@@ -147,7 +172,7 @@ while running:
     #check to see if a mob hits the player
     hits = pg.sprite.spritecollide(player,mobs,False) #parameters are objects to check against and group againt
                                                     #FALSE indicates whethere hit items in group should be deleted or not
-
+    
     for hit in hits:
         m = Mob()
         all_sprites.add(m)
@@ -158,6 +183,10 @@ while running:
 
     #draw/render
     screen.fill(BLACK)
+    #draws background on screen
+    #blit means copy the pixels of one thing on to another
+    screen.blit(background,background_rect)
+
     all_sprites.draw(screen)
     #after drawing anything use flip to display image
     pg.display.flip()
