@@ -33,6 +33,8 @@ class Player(pg.sprite.Sprite):
         self.image.set_colorkey(BLACK)
         #useful for moving, size, position and collision
         self.rect = self.image.get_rect() #looks at the image and gets its rect
+        self.radius = int(self.rect.width/2) #draws a cricle to see how big the radius is to later adjust
+        pg.draw.circle(self.image,RED,self.rect.center,self.radius)
         self.rect.centerx = WIDTH/2 #places image in the centre
         self.rect.bottom = HEIGHT-10 #puts it 10px from the bottom of the screen
         #needs to move side to side so we need speed
@@ -73,6 +75,8 @@ class Mob(pg.sprite.Sprite):
         self.image = pg.transform.scale(mob_img,(38,50))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
+        self.radius = int(self.rect.width*0.9/2)
+        pg.draw.circle(self.image,RED,self.rect.center,self.radius)
 
         #makes enemy spawn randomly at top of screen and start dropping down
         self.rect.x = random.randrange(0, WIDTH - self.rect.width) #appears within limits of the x of the screen
@@ -169,18 +173,18 @@ while running:
         #setting the last 2 parameters will delete the bullet and the mob which collide with each other
         #notice that this will kill the mobs so there needs to be a way of respawnig them if they get killed
     hits = pg.sprite.groupcollide(mobs,bullets,True,True)
+
     #check to see if a mob hits the player
-    hits = pg.sprite.spritecollide(player,mobs,False) #parameters are objects to check against and group againt
+    hits = pg.sprite.spritecollide(player,mobs,False,pg.sprite.collide_circle) #parameters are objects to check against and group againt
                                                     #FALSE indicates whethere hit items in group should be deleted or not
-    
+    if hits:
+        running = False
+
     for hit in hits:
         m = Mob()
         all_sprites.add(m)
         mobs.add(m)
-
-    if hits:
-        running = False
-
+  
     #draw/render
     screen.fill(BLACK)
     #draws background on screen
