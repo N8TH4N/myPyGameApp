@@ -6,8 +6,6 @@ import random
 from os import path
 img_dir = path.join(path.dirname(__file__),"img") #img is the folder here the graphics are
 
-#.
-
 #parameters
 WIDTH,HEIGHT,FPS = (480,600,60)
 #60 fps makes it fast and smooth
@@ -34,7 +32,6 @@ class Player(pg.sprite.Sprite):
         #useful for moving, size, position and collision
         self.rect = self.image.get_rect() #looks at the image and gets its rect
         self.radius = int(self.rect.width/2) #draws a cricle to see how big the radius is to later adjust
-        pg.draw.circle(self.image,RED,self.rect.center,self.radius)
         self.rect.centerx = WIDTH/2 #places image in the centre
         self.rect.bottom = HEIGHT-10 #puts it 10px from the bottom of the screen
         #needs to move side to side so we need speed
@@ -76,13 +73,29 @@ class Mob(pg.sprite.Sprite):
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.radius = int(self.rect.width*0.9/2)
-        pg.draw.circle(self.image,RED,self.rect.center,self.radius)
 
         #makes enemy spawn randomly at top of screen and start dropping down
         self.rect.x = random.randrange(0, WIDTH - self.rect.width) #appears within limits of the x of the screen
         self.rect.y = random.randrange(-100,-40) # this is off the screen
         self.speedy = random.randrange(1,8)
+        #rotating the enemy sprite
+        self.rot = 0 #angle of rotation
+        self.rot_speed = random.randrange(-8,8)
+
+        #get time since last update
+        #the variable will be updated each time the rotation happens
+        self.last_update = pg.time.get_ticks()
+    
+    def rotate(self):
+        #rotation code
+        #find out whether it is time to rotate
+        now = pg.time.get_ticks()
+        #if more than 50 in a millisecond will rotate
+        if now - self.last_update > 50:
+            self.last_update = now #take last update and set it to now
+
     def update(self):
+        self.rotate()
         #move downwards
         self.rect.y += self.speedy
         #gets rid of enemy when they get to bottom of screen
@@ -122,6 +135,16 @@ screen = pg.display.set_mode((WIDTH, HEIGHT))
 pg.display.set_caption("My Game")
 clock = pg.time.Clock()
 
+#searches for matching font
+font_name = pg.font.match_font('arial')
+
+def draw_text(surf,text,size, x,y):
+    font = pg.font.Font(font_name,size)
+    text_surface = font.render(text,True,WHITE)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x,y)
+    surf.blit(text_surface, text_rect)
+
 #loads all game graphics
 #convert() methods iwll draw the image in memory before it is displayed
 #this is faster than drawing it in real time i.e. pixel by pixel
@@ -147,7 +170,7 @@ for i in range(8):
     mobs.add(m)
 
 all_sprites.add(player)
-
+score = 0
 #Game loop
 running = True
 while running:
@@ -174,23 +197,25 @@ while running:
         #notice that this will kill the mobs so there needs to be a way of respawnig them if they get killed
     hits = pg.sprite.groupcollide(mobs,bullets,True,True)
 
-    #check to see if a mob hits the player
-    hits = pg.sprite.spritecollide(player,mobs,False,pg.sprite.collide_circle) #parameters are objects to check against and group againt
-                                                    #FALSE indicates whethere hit items in group should be deleted or not
-    if hits:
-        running = False
-
-    for hit in hits:
+    for hit in hits: 
+        score +=1 #adds a point for every hit made/tracks score   
         m = Mob()
         all_sprites.add(m)
         mobs.add(m)
+
+    #check to see if a mob hits the player
+    hits = pg.sprite.spritecollide(player,mobs,False,pg.sprite.collide_circle) #parameters are objects to check against and group againt
+                                                    #FALSE indicates whethere hit items in group should be deleted or not
+
+    if hits:
+        running = False
   
     #draw/render
     screen.fill(BLACK)
     #draws background on screen
     #blit means copy the pixels of one thing on to another
     screen.blit(background,background_rect)
-
+    draw_text(screen,str(score),18,WIDTH/2,10)
     all_sprites.draw(screen)
     #after drawing anything use flip to display image
     pg.display.flip()
